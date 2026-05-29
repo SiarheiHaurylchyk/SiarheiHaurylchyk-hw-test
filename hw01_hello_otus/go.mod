@@ -1,4 +1,4 @@
-module github.com/SiarheiHaurylchyk-hw-test/hw01_hello_otus
+module github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw01_hello_otus
 
 go 1.23
 
