@@ -19,7 +19,7 @@ func Unpack(str string) (string, error) {
 	for i := 0; i < len(runes); i++ {
 		curr := runes[i]
 		if curr == '\\' {
-			if i+1 > len(runes) {
+			if i+1 >= len(runes) {
 				return "", ErrInvalidString
 			}
 			next := runes[i+1]
