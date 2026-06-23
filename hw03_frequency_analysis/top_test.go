@@ -79,4 +79,17 @@ func TestTop10(t *testing.T) {
 			require.Equal(t, expected, Top10(text))
 		}
 	})
+
+	t.Run("simple cases", func(t *testing.T) {
+		require.Equal(t, []string{"hello"}, Top10("hello hello hello"))
+		require.Equal(t, []string{"world", "hello"}, Top10("hello world world hello world"))
+	})
+
+	t.Run("hyphen support", func(t *testing.T) {
+		require.Equal(t, []string{"винни-пух"}, Top10("Винни-Пух! Винни-Пух? Винни-Пух."))
+	})
+
+	t.Run("one word", func(t *testing.T) {
+		require.Equal(t, []string{"go"}, Top10("Go Go Go!!!"))
+	})
 }
