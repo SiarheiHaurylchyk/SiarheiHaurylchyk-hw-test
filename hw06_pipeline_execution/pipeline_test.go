@@ -145,6 +145,82 @@ func TestAllStageStop(t *testing.T) {
 		wg.Wait()
 
 		require.Len(t, result, 0)
+	})
+}
 
+func TestExecutePipelineExtra(t *testing.T) {
+	doubleStage := func(in In) Out {
+		out := make(Bi)
+		go func() {
+			defer close(out)
+			for value := range in {
+				out <- value.(int) * 2
+			}
+		}()
+		return out
+	}
+
+	t.Run("no stages returns input values as is", func(t *testing.T) {
+		in := make(Bi)
+		go func() {
+			in <- 10
+			in <- 20
+			close(in)
+		}()
+
+		result := make([]int, 0, 2)
+		for value := range ExecutePipeline(in, nil) {
+			result = append(result, value.(int))
+		}
+
+		require.Equal(t, []int{10, 20}, result)
+	})
+
+	t.Run("single stage", func(t *testing.T) {
+		in := make(Bi)
+		go func() {
+			in <- 1
+			in <- 2
+			in <- 3
+			close(in)
+		}()
+
+		result := make([]int, 0, 3)
+		for value := range ExecutePipeline(in, nil, doubleStage) {
+			result = append(result, value.(int))
+		}
+
+		require.Equal(t, []int{2, 4, 6}, result)
+	})
+
+	t.Run("empty input", func(t *testing.T) {
+		in := make(Bi)
+		close(in)
+
+		result := make([]int, 0)
+		for value := range ExecutePipeline(in, nil, doubleStage) {
+			result = append(result, value.(int))
+		}
+
+		require.Empty(t, result)
+	})
+
+	t.Run("done closed before any data", func(t *testing.T) {
+		in := make(Bi)
+		done := make(Bi)
+		close(done)
+
+		go func() {
+			in <- 1
+			in <- 2
+			close(in)
+		}()
+
+		result := make([]int, 0)
+		for value := range ExecutePipeline(in, done, doubleStage) {
+			result = append(result, value.(int))
+		}
+
+		require.Empty(t, result)
 	})
 }
