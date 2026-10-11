@@ -1,7 +1,9 @@
 package main
 
 import (
+	"context"
 	"io"
+	"net"
 	"time"
 )
 
@@ -12,10 +14,55 @@ type TelnetClient interface {
 	Receive() error
 }
 
+type client struct {
+	address string
+	timeout time.Duration
+	in      io.ReadCloser
+	out     io.Writer
+	conn    net.Conn
+}
+
 func NewTelnetClient(address string, timeout time.Duration, in io.ReadCloser, out io.Writer) TelnetClient {
-	// Place your code here.
+	return &client{
+		address: address,
+		timeout: timeout,
+		in:      in,
+		out:     out,
+	}
+}
+
+func (c *client) Connect() error {
+	ctx, cancel := context.WithTimeout(context.Background(), c.timeout)
+	defer cancel()
+
+	dialer := &net.Dialer{}
+
+	conn, err := dialer.DialContext(ctx, "tcp", c.address)
+	if err != nil {
+		return err
+	}
+
+	c.conn = conn
+
 	return nil
 }
 
-// Place your code here.
-// P.S. Author's solution takes no more than 50 lines.
+func (c *client) Close() error {
+	if c.conn == nil {
+		return nil
+	}
+
+	return c.conn.Close()
+}
+
+func (c *client) Send() error {
+	_, err := io.Copy(c.conn, c.in)
+
+	return err
+}
+
+func (c *client) Receive() error {
+	_, err := io.Copy(c.out, c.conn)
+
+	return err
+}
