@@ -1,0 +1,18 @@
+syntax = "proto3";
+
+package calendar.v1;
+
+option go_package = "github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/server/grpc/pb;pb";
+
+import "google/protobuf/duration.proto";
+import "google/protobuf/timestamp.proto";
+
+message Event {
+  string id = 1;
+  string title = 2;
+  google.protobuf.Timestamp start_time = 3;
+  google.protobuf.Timestamp end_time = 4;
+  string description = 5;
+  string user_id = 6;
+  google.protobuf.Duration notify_before = 7;
+}

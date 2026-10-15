@@ -9,6 +9,7 @@ import (
 var (
 	ErrDateBusy      = errors.New("this time is already taken by another event")
 	ErrEventNotFound = errors.New("event not found")
+	ErrInvalidEvent  = errors.New("invalid event")
 )
 
 type EventStorage interface {

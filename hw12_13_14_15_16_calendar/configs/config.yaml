@@ -8,5 +8,9 @@ server:
   host: 127.0.0.1
   port: 8080
 
+grpc:
+  host: 127.0.0.1
+  port: 50051
+
 database:
   dsn: postgres://postgres:password@localhost:5432/backend?sslmode=disable

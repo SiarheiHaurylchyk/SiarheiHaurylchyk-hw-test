@@ -16,6 +16,8 @@ linters-settings:
           - github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar
           - gopkg.in/yaml.v3
           - github.com/lib/pq
+          - google.golang.org/grpc
+          - google.golang.org/protobuf
       Test:
         files:
           - $test
@@ -25,8 +27,12 @@ linters-settings:
           - github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar
           - gopkg.in/yaml.v3
           - github.com/lib/pq
+          - google.golang.org/grpc
+          - google.golang.org/protobuf
 
 issues:
+  exclude-files:
+    - "\\.pb\\.go$"
   exclude-rules:
     - path: _test\.go
       linters:
