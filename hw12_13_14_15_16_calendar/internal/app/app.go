@@ -2,25 +2,27 @@ package app
 
 import (
 	"context"
+
+	"github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/storage"
 )
 
-type App struct { // TODO
+type App struct {
+	logger  Logger
+	storage storage.EventStorage
 }
 
-type Logger interface { // TODO
+type Logger interface {
+	Error(msg string)
 }
 
-type Storage interface { // TODO
-}
-
-func New(logger Logger, storage Storage) *App {
-	return &App{}
+func New(logger Logger, storage storage.EventStorage) *App {
+	return &App{logger: logger, storage: storage}
 }
 
 func (a *App) CreateEvent(ctx context.Context, id, title string) error {
-	// TODO
-	return nil
-	// return a.storage.CreateEvent(storage.Event{ID: id, Title: title})
+	err := a.storage.CreateEvent(ctx, storage.Event{ID: id, Title: title})
+	if err != nil {
+		a.logger.Error("create event: " + err.Error())
+	}
+	return err
 }
-
-// TODO
