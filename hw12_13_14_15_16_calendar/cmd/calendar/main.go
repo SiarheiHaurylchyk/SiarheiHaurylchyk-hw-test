@@ -11,10 +11,12 @@ import (
 
 	"github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/app"
 	"github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/logger"
+	internalgrpc "github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/server/grpc"
 	internalhttp "github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/server/http"
 	"github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/storage"
 	memorystorage "github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/storage/memory"
 	sqlstorage "github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/storage/sql"
+	_ "github.com/lib/pq"
 )
 
 var configFile string
@@ -55,22 +57,33 @@ func main() {
 
 	calendar := app.New(logg, eventStorage)
 
-	server := internalhttp.NewServer(logg, calendar, config.Server.Host, config.Server.Port)
+	httpServer := internalhttp.NewServer(logg, calendar, config.Server.Host, config.Server.Port)
+	grpcServer := internalgrpc.NewServer(logg, calendar, config.GRPC.Host, config.GRPC.Port)
 
 	go func() {
 		<-ctx.Done()
 
-		ctx, cancel := context.WithTimeout(context.Background(), time.Second*3)
-		defer cancel()
+		stopCtx, stopCancel := context.WithTimeout(context.Background(), time.Second*3)
+		defer stopCancel()
 
-		if err := server.Stop(ctx); err != nil {
+		if err := httpServer.Stop(stopCtx); err != nil {
 			logg.Error("failed to stop http server: " + err.Error())
+		}
+		if err := grpcServer.Stop(stopCtx); err != nil {
+			logg.Error("failed to stop grpc server: " + err.Error())
+		}
+	}()
+
+	go func() {
+		if err := grpcServer.Start(); err != nil {
+			logg.Error("failed to start grpc server: " + err.Error())
+			cancel()
 		}
 	}()
 
 	logg.Info("calendar is running...")
 
-	if err = server.Start(); err != nil {
+	if err = httpServer.Start(); err != nil {
 		logg.Error("failed to start http server: " + err.Error())
 		cancel()
 		os.Exit(1)

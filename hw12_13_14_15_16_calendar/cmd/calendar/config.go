@@ -10,6 +10,7 @@ type Config struct {
 	Logger   LoggerConf   `yaml:"logger"`
 	Storage  StorageConf  `yaml:"storage"`
 	Server   ServerConf   `yaml:"server"`
+	GRPC     ServerConf   `yaml:"grpc"`
 	Database DatabaseConf `yaml:"database"`
 }
 

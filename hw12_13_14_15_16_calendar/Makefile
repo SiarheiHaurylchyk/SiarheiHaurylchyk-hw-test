@@ -57,6 +57,9 @@ version: build
 test:
 	go test -race -count=1 -timeout=1m ./...
 
+generate:
+	go generate ./...
+
 install-lint-deps:
 	(which golangci-lint > /dev/null) || curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.63.4
 
@@ -66,4 +69,4 @@ lint: install-lint-deps
 migrate:
 	psql "postgres://$(POSTGRES_USER):$(POSTGRES_PASSWORD)@localhost:$(POSTGRES_PORT)/$(POSTGRES_DB)?sslmode=disable" -f migrations/001_create_events.sql
 
-.PHONY: build run build-img run-img version test lint migrate
+.PHONY: build run build-img run-img version test lint migrate generate

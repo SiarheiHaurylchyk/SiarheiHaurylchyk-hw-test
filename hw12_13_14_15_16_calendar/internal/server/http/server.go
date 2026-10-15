@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"net/http"
 	"time"
+
+	"github.com/SiarheiHaurylchyk/SiarheiHaurylchyk-hw-test/hw12_13_14_15_calendar/internal/storage"
 )
 
 type Server struct {
@@ -16,11 +18,25 @@ type Logger interface {
 	Info(msg string)
 }
 
-type Application interface{}
+type Application interface {
+	CreateEvent(ctx context.Context, event storage.Event) error
+	UpdateEvent(ctx context.Context, event storage.Event) error
+	DeleteEvent(ctx context.Context, eventID string) error
+	ListEventsForDay(ctx context.Context, date time.Time) ([]storage.Event, error)
+	ListEventsForWeek(ctx context.Context, date time.Time) ([]storage.Event, error)
+	ListEventsForMonth(ctx context.Context, date time.Time) ([]storage.Event, error)
+}
 
-func NewServer(logger Logger, _ Application, host string, port int) *Server {
+func NewServer(logger Logger, app Application, host string, port int) *Server {
+	events := &eventHandler{app: app}
 	mux := http.NewServeMux()
 	mux.HandleFunc("/hello", helloHandler)
+	mux.HandleFunc("POST /events", events.create)
+	mux.HandleFunc("PUT /events/{id}", events.update)
+	mux.HandleFunc("DELETE /events/{id}", events.delete)
+	mux.HandleFunc("GET /events/day", events.listDay)
+	mux.HandleFunc("GET /events/week", events.listWeek)
+	mux.HandleFunc("GET /events/month", events.listMonth)
 
 	return &Server{
 		httpServer: &http.Server{
